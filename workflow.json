@@ -1,0 +1,138 @@
+{
+  "workflow_name": "OutboundLeadGenerationV2",
+  "description": "Mocked end-to-end AI agent workflow for B2B outbound lead gen (clean rebuild)",
+  "config": {
+    "scoring": {
+      "weights": {
+        "revenue": 0.3,
+        "employee_count": 0.2,
+        "signal_match": 0.4,
+        "tech_stack": 0.1
+      }
+    }
+  },
+  "steps": [
+    {
+      "id": "prospect_search",
+      "agent": "ProspectSearchAgent",
+      "inputs": {
+        "icp": {
+          "industry": "SaaS",
+          "location": "USA",
+          "employee_count": {
+            "min": 100,
+            "max": 1000
+          },
+          "revenue": {
+            "min": 20000000,
+            "max": 200000000
+          }
+        },
+        "signals": [
+          "recent_funding",
+          "hiring_for_sales"
+        ]
+      },
+      "instructions": "Search for prospects",
+      "tools": [],
+      "output_schema": {
+        "leads": [
+          {
+            "company": "string",
+            "contact_name": "string",
+            "email": "string"
+          }
+        ]
+      }
+    },
+    {
+      "id": "enrichment",
+      "agent": "DataEnrichmentAgent",
+      "inputs": {
+        "leads": "${prospect_search.output.leads}"
+      },
+      "instructions": "Enrich leads",
+      "tools": [],
+      "output_schema": {
+        "enriched_leads": [
+          {
+            "company": "string",
+            "contact": "string",
+            "role": "string",
+            "technologies": "array"
+          }
+        ]
+      }
+    },
+    {
+      "id": "scoring",
+      "agent": "ScoringAgent",
+      "inputs": {
+        "enriched_leads": "${enrichment.output.enriched_leads}",
+        "scoring_criteria": "${config.scoring}"
+      },
+      "instructions": "Score leads",
+      "tools": [],
+      "output_schema": {
+        "ranked_leads": "array"
+      }
+    },
+    {
+      "id": "outreach_content",
+      "agent": "OutreachContentAgent",
+      "inputs": {
+        "ranked_leads": "${scoring.output.ranked_leads}",
+        "persona": "SDR",
+        "tone": "friendly"
+      },
+      "instructions": "Create outreach",
+      "tools": [],
+      "output_schema": {
+        "messages": [
+          {
+            "lead": "string",
+            "email_body": "string"
+          }
+        ]
+      }
+    },
+    {
+      "id": "send",
+      "agent": "OutreachExecutorAgent",
+      "inputs": {
+        "messages": "${outreach_content.output.messages}"
+      },
+      "instructions": "Send messages (mock)",
+      "tools": [],
+      "output_schema": {
+        "sent_status": "array",
+        "campaign_id": "string"
+      }
+    },
+    {
+      "id": "response_tracking",
+      "agent": "ResponseTrackerAgent",
+      "inputs": {
+        "campaign_id": "${send.output.campaign_id}"
+      },
+      "instructions": "Track responses (mock)",
+      "tools": [],
+      "output_schema": {
+        "responses": "array"
+      }
+    },
+    {
+      "id": "feedback_trainer",
+      "agent": "FeedbackTrainerAgent",
+      "inputs": {
+        "responses": "${response_tracking.output.responses}",
+        "current_config": "${config}"
+      },
+      "instructions": "Analyze and recommend",
+      "tools": [],
+      "output_schema": {
+        "recommendations": "array"
+      }
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+# Python
+venv/
+__pycache__/
+*.pyc
+
+# Environment
+.env
+*.log
+*.db
+
+# Outputs
+outputs/
+logs/
+run_context.json
